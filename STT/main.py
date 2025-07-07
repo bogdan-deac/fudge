@@ -18,7 +18,7 @@ aligned_result = whisperx.align(result["segments"], model_a, metadata, video_pat
 print("Aligned segments:", aligned_result["word_segments"])
 
 for word in aligned_result["word_segments"]:
-    if all(k in word for k in ("text", "start", "end")):
-        print(f"{word['text']} => {word['start']} - {word['end']}")
+    if all(k in word for k in ("word", "start", "end")):
+        print(f"{word['word']} => {word['start']} - {word['end']}")
     else:
         print("Missing or incomplete segment:", word)
