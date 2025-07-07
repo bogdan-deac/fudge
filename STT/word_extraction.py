@@ -1,8 +1,16 @@
+from config import CONFIG
+from openai import AzureOpenAI
 from data_loader import DataLoader
 import whisperx
 import torch
 
-video_path = "../video resources/v1.mp4"
+client = AzureOpenAI(
+    api_key=CONFIG["OPENAI_API_KEY"],
+    api_version=CONFIG["API_VERSION"],
+    azure_endpoint=CONFIG["AZURE_ENDPOINT"]
+)
+
+video_path = "../video resources/v4.mp4"
 data_loader = DataLoader(video_path)
 data = data_loader.load_data()
 
@@ -22,3 +30,23 @@ for word in aligned_result["word_segments"]:
         print(f"{word['word']} => {word['start']} - {word['end']}")
     else:
         print("Missing or incomplete segment:", word)
+        
+for segment in result['segments']:
+    print(f"Segment: {segment['text']}")
+    response = client.chat.completions.create(
+        model=CONFIG["MODEL"],
+        messages=[
+            {
+                "role": "system",
+                "content": "Find all obscene and bad words in the text (no matter the language the text is in). Return ONLY a valid Python list (on a single line), WITHOUT using code blocks or markdown formatting."
+            },
+            {
+                "role": "user",
+                "content": segment['text']
+            },
+        ],
+        temperature=0.0,
+        n=1
+    )
+    print("Obscene words found:", response.choices[0].message.content.strip())
+    print("-" * 40)
