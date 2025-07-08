@@ -7,3 +7,4 @@ ffmpeg-python==0.2.0
 whisperx @ git+https://github.com/m-bain/whisperx.git
 opencv-python==4.9.0.80
 moviepy==1.0.3
+python-dotenv==0.21.0
