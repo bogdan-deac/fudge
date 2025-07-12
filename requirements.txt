@@ -1,10 +1,10 @@
-torch==2.1.2
-torchaudio==2.1.2
-torchvision==0.16.2
-transformers==4.36.2
+torch==2.5.1
+torchaudio==2.5.1
+transformers==4.48.0
 accelerate==0.25.0
 ffmpeg-python==0.2.0
 whisperx @ git+https://github.com/m-bain/whisperx.git
 opencv-python==4.9.0.80
 moviepy==1.0.3
 python-dotenv==0.21.0
+openai==1.95.1
