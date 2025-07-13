@@ -39,5 +39,5 @@ if __name__ == '__main__':
     whisper_model = whisperx.load_model(WHISPER_MODEL, device=device, compute_type="int8")
 
 
-    extractor = WordExtractor(client=client, device=device, model=whisper_model)
+    extractor = WordExtractor(client=client, device=device, model=whisper_model, openai_model=OPENAI_MODEL)
     extractor.extract_words(video_path=video_path, data=data)
