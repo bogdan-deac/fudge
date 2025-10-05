@@ -9,6 +9,7 @@ class WordSubstitutor:
         self.openai_model = openai_model
         self.obscene_words = obscene_words
         self.language = language
+        self.obscene_words_replacements = []
 
     def substitute_words(self):
         response = self.client.chat.completions.create(
@@ -27,4 +28,6 @@ class WordSubstitutor:
             temperature=0.0,
             n=1
         )
+        if response.choices[0].message.content.strip() != "[]":
+            self.obscene_words_replacements.extend(eval(response.choices[0].message.content.strip()))
         print("Obscene words replacements:", response.choices[0].message.content.strip())

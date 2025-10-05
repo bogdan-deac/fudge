@@ -4,7 +4,10 @@ import argparse
 import torch
 from dotenv import load_dotenv
 from openai import AzureOpenAI
-
+from torch.serialization import add_safe_globals
+from TTS.api import TTS
+from TTS.tts.configs.xtts_config import XttsConfig
+from TTS.tts.models.xtts import XttsAudioConfig
 
 from STT.data_loader import DataLoader
 from STT.word_extraction import WordExtractor
@@ -18,6 +21,7 @@ if __name__ == '__main__':
     API_VERSION = os.getenv('API_VERSION')
     WHISPER_MODEL = os.getenv('WHISPER_MODEL')
     OPENAI_MODEL = os.getenv('OPENAI_MODEL')
+    XTTS_MODEL_PATH = os.getenv('XTTS_MODEL_PATH')
 
     parser = argparse.ArgumentParser(description="A simple CLI example")
     parser.add_argument("--video_path", help="the path of the video")
@@ -25,7 +29,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     video_path = os.path.abspath(args.video_path)
-
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using device:", device)
@@ -53,3 +56,22 @@ if __name__ == '__main__':
     substitutor = WordSubstitutor(client=client, device=device, model=whisper_model, openai_model=OPENAI_MODEL, obscene_words=extractor.obscene_words, language=language)
     substitutor.substitute_words()
     print("Finished substituting obscene words.")
+
+    for i, segment in enumerate(result['segments']):
+        text = segment['text']
+        for word, replacement in zip(substitutor.obscene_words, substitutor.obscene_words_replacements):
+            text = text.replace(word, replacement)
+        segment['text'] = text
+        print(f"Segment {i} after replacement: {segment['text']}")
+
+    add_safe_globals([XttsConfig, XttsAudioConfig])
+    tts = TTS(XTTS_MODEL_PATH).to(device)
+    tts.tts_to_file(
+        text=result['segments'][0]['text'],
+        speaker_wav=os.path.splitext(video_path)[0] + "_audio.wav",
+        language=language if language != "unknown" else "en",
+        file_path=os.path.splitext(video_path)[0] + "_cloned_replacement.wav",
+        speed=1.5,
+        split_sentences=False
+    )
+    print("Finished generating replacement audio.")
